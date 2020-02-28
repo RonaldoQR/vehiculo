@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mi app web</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body onload="consultar();">
+        <div>Iniciar Sesión</div>
+        <input type="text" id="user" name="usuario" placeholder="Usuario">
+        <input type="password" id="pass" name="clave" placeholder="Clave">
+        <br>
+        <div>Actualizar Datos</div>
+            <input type="text" id="id_vehiculo" name="id_vehiculo" placeholder="Id_Vehiculo">
+            <input type="text" id="marca" name="marca" placeholder="Marca">
+            <input type="text" id="precio" name="precio" placeholder="Precio">
+            <input type="text" id="color" name="color" placeholder="Color">
+            <input type="text" id="year" name="year" placeholder="Año">
+            <button onclick="agregar();">Agregar</button>
+
+            <br>
+            
+        <div>Calcular</div>
+        <button onclick="logear();">Login</button>
+        <div id="rpta"></div>
+        <br><br>
+        <table id="myTable" cellpadding="1" border="1" STYLE="border-collapse:collapse;width:100%">
+            <tr>
+                <th>Id</th>
+                <th>Marca</th>
+                <th>Precio</th>            
+                <th>Color</th>
+                <th>Year</th>
+                <th>Precio en Dolares</th>
+                <th colspan="3">Acciones</th>
+            </tr>
+        </table>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+        <script type="text/javascript">
+            function borrar(btn, id_vehiculo) {
+                console.log(id_vehiculo);
+                var respuesta = prompt(`Escribe OK para eliminar`);
+                if(respuesta == 'OK') {
+                    var fila = btn.closest('tr');
+                    // LLAMAR AL JAVA
+                    $.ajax({
+                        method : 'POST',
+                        url    : 'EliminarServlet',
+                        data   : {
+                            id_ve : id_vehiculo
+                        },
+                        success: function(msg) {
+                            console.log(msg);
+                            fila.remove();
+                            alert(msg.mensaje);
+                        },
+                        error: function(msg) {
+                            console.error(msg);
+                        }
+                    });
+                }
+            }
+            
+            function agregar() {
+                
+                var marca= document.getElementById("marca").value;
+                var precio= document.getElementById("precio").value;
+                var color= document.getElementById("color").value;
+                var year= document.getElementById("year").value;
+                $.ajax({
+                    method : 'POST',
+                    url    : 'AgregarServlet',
+                    data   : {
+                        
+                        marca : marca,
+                        precio   : precio,
+                        color : color,
+                        year : year
+                    },
+                    success: function(msg) {
+                        console.log(msg);
+                        location.reload();
+                        /*var tabla = document.getElementById("myTable");
+                        var fila = tabla.insertRow(1);
+                        //CREAR CELDAS
+                        
+                        var celda0 = fila.insertCell(0);
+                        var celda1 = fila.insertCell(1);
+                        var celda2 = fila.insertCell(2);
+                        var celda3 = fila.insertCell(3);
+                        var celda4 = fila.insertCell(4);
+                        var celda6 = fila.insertCell(6);
+                        //PONER UN VALOR EN CADA CELDA
+                        celda0.innerHTML = msg.id_prod;
+                        celda1.innerHTML = marca;
+                        celda2.innerHTML = precio;
+                        celda3.innerHTML = color;
+                        celda4.innerHTML = year;
+                        celda6.innerHTML = '<button onclick="borrar(this, '+msg.id_prod+')">Borrar</button>'+
+                            '<button onclick="actualizar('+msg.id_prod+')">Actualizar</button>'
+                            +'<button onclick="ver(this)">Ver</button>';
+                        //alert(msg.mensaje);*/
+                    },
+                    error: function(msg) {
+                        console.error(msg);
+                    }
+                });
+                
+                
+                
+            }
+            
+            function actualizar(btn, id_vehiculo) {
+                var marca= document.getElementById("marca").value;
+                var precio= document.getElementById("precio").value;
+                var color= document.getElementById("color").value;
+                var year= document.getElementById("year").value;
+                $.ajax({
+                    method : 'POST',
+                    url    : 'ActualizarServlet',
+                    data   : {
+                        id_vehiculo: id_vehiculo,
+                        marca : marca,
+                        precio   : precio,
+                        color : color,
+                        year : year
+                    },
+                    success: function(msg) {
+                        console.log(msg);
+                        document.getElementById("rpta").innerHTML = msg.msj;
+                        location.reload();
+                        '<META HTTP-EQUIV="REFRESH" CONTENT="2;URL=index.html">';
+                    },
+                    error: function(msg) {
+                        console.error(msg);
+                    }
+                });
+                
+                
+                
+            }
+            
+            function consultar() {
+                $.ajax({
+                    method : 'POST',
+                    url    : 'Consulta',
+                    success: function(msg) {
+                        //console.table(msg);
+                        var tabla = document.getElementById("myTable");
+                        for(var i = 0; i < msg.length; i++) {
+                            //CREO UNA FILA
+                            var fila = tabla.insertRow(1);
+                            //CREAR CELDAS
+                            var celda0 = fila.insertCell(0);
+                            var celda1 = fila.insertCell(1);
+                            var celda2 = fila.insertCell(2);
+                            var celda3 = fila.insertCell(3);
+                            var celda4 = fila.insertCell(4);
+                            var celda5 = fila.insertCell(5);
+                            var celda6 = fila.insertCell(6);
+                            var celda7 = fila.insertCell(7);
+                            var celda8 = fila.insertCell(8);
+                            //PONER UN VALOR EN CADA CELDA
+                            celda0.innerHTML = msg[i].id_vehiculo;
+                            celda1.innerHTML = msg[i].marca;
+                            celda2.innerHTML = msg[i].precio;
+                            celda3.innerHTML = msg[i].color;
+                            celda4.innerHTML = msg[i].year;
+                            celda5.innerHTML = msg[i].Dolares;
+                            celda6.innerHTML = '<button onclick="borrar(this, '+msg[i].id_vehiculo+')" >Borrar</button>';
+                            celda7.innerHTML = '<button onclick="actualizar(this, '+msg[i].id_vehiculo+')">Actualizar</button>';
+                            celda8.innerHTML = '<button onclick="ver(this, '+msg[i].id_vehiculo+')">Ver Datos</button>';
+                            
+                            
+                        }
+                    },
+                    error: function(msg) {
+                        console.error(msg);
+                    }
+                });
+            }
+            
+            function ver(btn) {
+                var fila = btn.closest('tr');
+                var id_vehiculo = fila.cells[0].innerHTML;
+                var marca = fila.cells[1].innerHTML;
+                var precio = fila.cells[2].innerHTML;
+                var color = fila.cells[3].innerHTML;
+                var year = fila.cells[4].innerHTML;
+                document.getElementById("id_vehiculo").value = id_vehiculo;
+                console.log(id_vehiculo);
+                document.getElementById("marca").value = marca;
+                console.log(marca);
+                document.getElementById("precio").value = precio;
+                console.log(precio);
+                document.getElementById("color").value = color;
+                console.log(color);
+                document.getElementById("year").value = year;
+                console.log(year);
+            }
+            
+            function logear() {
+                var usuario = document.getElementById("user").value;
+                var clave = document.getElementById("pass").value;
+                console.log('haciendo el login. '+usuario+ ' clave: '+clave);
+                $.ajax({
+                    method : 'POST',
+                    url    : 'loginServlet',
+                    data   : {
+                        usuario : usuario,
+                        clave   : clave
+                    },
+                    success: function(msg) {
+                        console.log(msg);
+                        document.getElementById("rpta").innerHTML = msg.msj;
+                    },
+                    error: function(msg) {
+                        console.error(msg);
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>
